@@ -5,17 +5,11 @@ RUN apk add --no-cache openssl
 
 WORKDIR /app
 
-# Copy package files first
-COPY package*.json ./
-
-# Copy prisma directory specifically (before npm install)
-COPY prisma ./prisma/
+# Copy all files first
+COPY . .
 
 # Install dependencies
 RUN npm install
-
-# Copy the rest of the application
-COPY . .
 
 # Build TypeScript code
 RUN npm run build
