@@ -5,11 +5,17 @@ RUN apk add --no-cache openssl
 
 WORKDIR /app
 
-# Copy all files first
-COPY . .
+# Copy package files from subdirectory
+COPY vehicle-operations-api/package*.json ./
+
+# Copy prisma directory
+COPY vehicle-operations-api/prisma ./prisma/
 
 # Install dependencies
 RUN npm install
+
+# Copy the rest of the application
+COPY vehicle-operations-api/ .
 
 # Build TypeScript code
 RUN npm run build
