@@ -34,3 +34,5 @@ The database schema includes the following models:
 ### Installation
 
 1. Clone the repository:
+
+<!-- git clone https://github.com/ZaidAltamari/vehicle-operations-api-new.git -->
