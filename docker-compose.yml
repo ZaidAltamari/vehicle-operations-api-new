@@ -6,9 +6,10 @@ services:
       ports:
          - '3000:3000'
       environment:
-         DATABASE_URL: postgresql://postgres:Blackbox007@db:5432/vehicle_operations
+         DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:Blackbox007@db:5432/vehicle_operations}
       depends_on:
          - db
+      command: sh -c "npx prisma migrate deploy && npm start"
 
    db:
       image: postgres:14
