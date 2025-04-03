@@ -23,9 +23,10 @@ RUN npm run build
 EXPOSE 3000
 
 # Create an entrypoint script
-RUN echo '#!/bin/sh \n\
-npx prisma migrate deploy \n\
-npm start' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
+RUN echo '#!/bin/sh' > /app/entrypoint.sh && \
+    echo 'npx prisma migrate deploy' >> /app/entrypoint.sh && \
+    echo 'npm start' >> /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
 
 # Run the entrypoint script
 CMD ["/app/entrypoint.sh"]
