@@ -5,17 +5,25 @@ RUN apk add --no-cache openssl
 
 WORKDIR /app
 
-# Copy package files directly (no subdirectory)
+# Copy package files first
 COPY package*.json ./
 
-# Copy prisma directory
-COPY prisma ./prisma/
+# First create the prisma directory
+RUN mkdir -p prisma
+
+# Copy prisma files separately
+COPY prisma/schema.prisma ./prisma/
+COPY prisma/migration_lock.toml ./prisma/
+COPY prisma/migrations ./prisma/migrations/
 
 # Install dependencies
 RUN npm install
 
 # Copy the rest of the application
 COPY . .
+
+# Generate Prisma client
+RUN npx prisma generate
 
 # Build TypeScript code
 RUN npm run build
