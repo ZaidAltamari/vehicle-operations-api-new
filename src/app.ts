@@ -18,14 +18,19 @@ export function build(): FastifyInstance {
 
 	server.setErrorHandler(errorHandler);
 
-	// Updated CORS configuration to allow all origins
+	server.addHook('onSend', (request, reply, payload, done) => {
+		reply.header('Cache-Control', 'no-cache, no-store, must-revalidate');
+		reply.header('Pragma', 'no-cache');
+		reply.header('Expires', '0');
+		done(null, payload);
+	});
+
 	server.register(fastifyCors, {
 		origin: true,
 		methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
 		credentials: true
 	});
 
-	// Updated Swagger configuration with proper server URLs
 	server.register(fastifySwagger, {
 		openapi: {
 			info: {
@@ -52,7 +57,6 @@ export function build(): FastifyInstance {
 		uiConfig: {
 			docExpansion: 'list',
 			deepLinking: true,
-			// Set the default server to match the environment
 			defaultModelsExpandDepth: 1,
 			defaultModelExpandDepth: 1,
 		},
@@ -63,9 +67,66 @@ export function build(): FastifyInstance {
 	server.register(routeRoutes, { prefix: '/api/routes' });
 	server.register(scheduleRoutes, { prefix: '/api/schedules' });
 
-	// Add a root route for API health check
-	server.get('/', async () => {
-		return { status: 'ok', message: 'Vehicle Operations API is running' };
+	server.get('/', async (request, reply) => {
+		return reply
+			.code(200)
+			.header('Content-Type', 'text/html')
+			.send(`
+				<!DOCTYPE html>
+				<html>
+					<head>
+						<title>Vehicle Operations API</title>
+						<style>
+							body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; color: #333; }
+							h1 { color: #2c3e50; margin-bottom: 10px; }
+							h2 { color: #3498db; margin-top: 30px; }
+							.container { max-width: 800px; margin: 0 auto; }
+							.status { padding: 20px; background-color: #f8f9fa; border-radius: 5px; border-left: 5px solid #2ecc71; }
+							.links { margin-top: 30px; }
+							.endpoint { background-color: #f8f9fa; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+							.endpoint-name { font-weight: bold; color: #e74c3c; }
+							a { color: #3498db; text-decoration: none; padding: 10px 15px; display: inline-block; background-color: #f8f9fa; border-radius: 4px; margin-right: 10px; margin-bottom: 10px; }
+							a:hover { background-color: #eaeaea; text-decoration: none; }
+							footer { margin-top: 50px; font-size: 0.8em; color: #95a5a6; text-align: center; }
+						</style>
+					</head>
+					<body>
+						<div class="container">
+							<h1>Vehicle Operations API</h1>
+							<p>API for managing vehicle operations, routes, and schedules</p>
+							
+							<div class="status">
+								<p>✅ API is running successfully</p>
+								<p>Server time: ${new Date().toLocaleString()}</p>
+							</div>
+							
+							<h2>API Documentation</h2>
+							<div class="links">
+								<a href="/documentation">Swagger UI Documentation</a>
+								<a href="/documentation/json">OpenAPI JSON Schema</a>
+							</div>
+							
+							<h2>Available Endpoints</h2>
+							<div class="endpoint">
+								<span class="endpoint-name">GET /api/vehicles</span> - List all vehicle types
+							</div>
+							<div class="endpoint">
+								<span class="endpoint-name">GET /api/operations</span> - List all operations
+							</div>
+							<div class="endpoint">
+								<span class="endpoint-name">GET /api/routes</span> - List all routes
+							</div>
+							<div class="endpoint">
+								<span class="endpoint-name">GET /api/schedules</span> - List all schedules
+							</div>
+							
+							<footer>
+								Vehicle Operations API v1.0.0 | Running on Render
+							</footer>
+						</div>
+					</body>
+				</html>
+			`);
 	});
 
 	return server;
