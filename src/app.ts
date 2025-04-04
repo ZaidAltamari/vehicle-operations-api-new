@@ -18,8 +18,14 @@ export function build(): FastifyInstance {
 
 	server.setErrorHandler(errorHandler);
 
-	server.register(fastifyCors);
+	// Updated CORS configuration to allow all origins
+	server.register(fastifyCors, {
+		origin: true,
+		methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+		credentials: true
+	});
 
+	// Updated Swagger configuration with proper server URLs
 	server.register(fastifySwagger, {
 		openapi: {
 			info: {
@@ -30,8 +36,13 @@ export function build(): FastifyInstance {
 			},
 			servers: [
 				{
-					url: 'http://localhost:3000',
+					url: process.env.RENDER_EXTERNAL_URL || 'https://vehicle-operations-api-new-6.onrender.com',
+					description: 'Production server'
 				},
+				{
+					url: 'http://localhost:3000',
+					description: 'Development server'
+				}
 			],
 		},
 	});
@@ -40,13 +51,22 @@ export function build(): FastifyInstance {
 		routePrefix: '/documentation',
 		uiConfig: {
 			docExpansion: 'list',
+			deepLinking: true,
+			// Set the default server to match the environment
+			defaultModelsExpandDepth: 1,
+			defaultModelExpandDepth: 1,
 		},
 	});
 
-	server.register(vehicleTypeRoutes, { prefix: '/api/vehicles' }); // Changed to vehicleRoutes
+	server.register(vehicleTypeRoutes, { prefix: '/api/vehicles' });
 	server.register(operationRoutes, { prefix: '/api/operations' });
 	server.register(routeRoutes, { prefix: '/api/routes' });
 	server.register(scheduleRoutes, { prefix: '/api/schedules' });
+
+	// Add a root route for API health check
+	server.get('/', async () => {
+		return { status: 'ok', message: 'Vehicle Operations API is running' };
+	});
 
 	return server;
 }
