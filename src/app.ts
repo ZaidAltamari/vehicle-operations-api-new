@@ -32,8 +32,6 @@ export function build(): FastifyInstance {
 		credentials: true,
 	});
 
-	server.register(vehicleAllocationRoutes, { prefix: '/api/allocations' });
-
 	server.register(fastifySwagger, {
 		openapi: {
 			info: {
@@ -71,6 +69,7 @@ export function build(): FastifyInstance {
 	server.register(operationRoutes, { prefix: '/api/operations' });
 	server.register(routeRoutes, { prefix: '/api/routes' });
 	server.register(scheduleRoutes, { prefix: '/api/schedules' });
+	server.register(vehicleAllocationRoutes, { prefix: '/api/allocations' });
 
 	server.get('/', async (request, reply) => {
 		return reply.code(200).header('Content-Type', 'text/html').send(`
