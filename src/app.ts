@@ -8,6 +8,7 @@ import { operationRoutes } from './routes/operationRoutes';
 import { routeRoutes } from './routes/routeRoutes';
 import { scheduleRoutes } from './routes/scheduleRoutes';
 import { errorHandler } from './utils/errorHandler';
+import { vehicleAllocationRoutes } from './routes/vehicleAllocationRoutes';
 
 export function build(): FastifyInstance {
 	const server = Fastify({
@@ -28,8 +29,10 @@ export function build(): FastifyInstance {
 	server.register(fastifyCors, {
 		origin: true,
 		methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-		credentials: true
+		credentials: true,
 	});
+
+	server.register(vehicleAllocationRoutes, { prefix: '/api/allocations' });
 
 	server.register(fastifySwagger, {
 		openapi: {
@@ -41,13 +44,15 @@ export function build(): FastifyInstance {
 			},
 			servers: [
 				{
-					url: process.env.RENDER_EXTERNAL_URL || 'https://vehicle-operations-api-new-6.onrender.com',
-					description: 'Production server'
+					url:
+						process.env.RENDER_EXTERNAL_URL ||
+						'https://vehicle-operations-api-new-6.onrender.com',
+					description: 'Production server',
 				},
 				{
 					url: 'http://localhost:3000',
-					description: 'Development server'
-				}
+					description: 'Development server',
+				},
 			],
 		},
 	});
@@ -68,10 +73,7 @@ export function build(): FastifyInstance {
 	server.register(scheduleRoutes, { prefix: '/api/schedules' });
 
 	server.get('/', async (request, reply) => {
-		return reply
-			.code(200)
-			.header('Content-Type', 'text/html')
-			.send(`
+		return reply.code(200).header('Content-Type', 'text/html').send(`
 				<!DOCTYPE html>
 				<html>
 					<head>
@@ -94,18 +96,18 @@ export function build(): FastifyInstance {
 						<div class="container">
 							<h1>Vehicle Operations API</h1>
 							<p>API for managing vehicle operations, routes, and schedules</p>
-							
+
 							<div class="status">
 								<p>✅ API is running successfully</p>
 								<p>Server time: ${new Date().toLocaleString()}</p>
 							</div>
-							
+
 							<h2>API Documentation</h2>
 							<div class="links">
 								<a href="/documentation">Swagger UI Documentation</a>
 								<a href="/documentation/json">OpenAPI JSON Schema</a>
 							</div>
-							
+
 							<h2>Available Endpoints</h2>
 							<div class="endpoint">
 								<span class="endpoint-name">GET /api/vehicles</span> - List all vehicle types
@@ -119,7 +121,7 @@ export function build(): FastifyInstance {
 							<div class="endpoint">
 								<span class="endpoint-name">GET /api/schedules</span> - List all schedules
 							</div>
-							
+
 							<footer>
 								Vehicle Operations API v1.0.0 | Running on Render
 							</footer>
